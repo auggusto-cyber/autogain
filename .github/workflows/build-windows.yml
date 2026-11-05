@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Baixar o codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configurar (CMake + Visual Studio 2022)
         run: cmake -S . -B build -A x64 -DAUTOGAIN_BUILD_TESTS=ON
@@ -32,8 +32,12 @@ jobs:
           Invoke-WebRequest -Uri https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_Windows.zip -OutFile pluginval.zip
           Expand-Archive pluginval.zip -DestinationPath pluginval
           $vst3 = "build\AutoGain_artefacts\Release\VST3\Auto Gain.vst3"
-          .\pluginval\pluginval.exe --strictness-level 5 --validate-in-process --output-dir pluginval-logs "$vst3"
-          if ($LASTEXITCODE -ne 0) { Write-Error "pluginval reprovou o plugin"; exit 1 }
+          # pluginval e um app de janela: Start-Process -Wait garante esperar o fim e ler o codigo de saida certo
+          $p = Start-Process -FilePath ".\pluginval\pluginval.exe" -Wait -PassThru -NoNewWindow `
+                 -ArgumentList @("--strictness-level", "5", "--validate-in-process", "--output-dir", "pluginval-logs", "`"$vst3`"")
+          Get-ChildItem pluginval-logs -Filter *.txt -ErrorAction SilentlyContinue | ForEach-Object { Get-Content $_.FullName }
+          if ($p.ExitCode -ne 0) { Write-Error "pluginval reprovou o plugin (codigo $($p.ExitCode))"; exit 1 }
+          Write-Host "pluginval: APROVADO"
 
       - name: Montar pacote de instalacao
         shell: pwsh
