@@ -1,0 +1,71 @@
+=====================================================
+  AUTO GAIN by Augusto Souza  -  v1.0.0  (VST3, Windows 64 bits)
+  Ganho automatico para uso ao vivo no REAPER (Input FX)
+=====================================================
+
+ONDE BAIXAR
+  https://github.com/auggusto-cyber/autogain/releases/latest
+  Arquivo: AutoGain-Windows-x64.zip
+  (o repositorio e privado: entre com a conta auggusto-cyber)
+
+
+INSTALACAO (5 minutos)
+-----------------------
+1. Baixe o AutoGain-Windows-x64.zip no PC do som.
+
+2. Clique com o botao direito no zip > "Extrair tudo...".
+   Dentro tem a pasta "Auto Gain.vst3" e este INSTALAR.txt.
+
+3. Copie a pasta "Auto Gain.vst3" INTEIRA para:
+
+       C:\Program Files\Common Files\VST3\
+
+   (o Windows vai pedir permissao de administrador: clique em Continuar)
+
+4. Abra o REAPER:
+   Options > Preferences > Plug-ins > VST
+   Clique em "Re-scan" (ou "Clear cache/re-scan") e depois em OK.
+
+5. Na track do microfone/instrumento:
+   - clique no botao "IN FX" da track (Input FX)
+   - procure "Auto Gain" (fabricante: Augusto Souza)
+   - adicione.
+
+   Importante: o Input FX so funciona com a track ARMADA (gravar)
+   ou com o MONITORAMENTO ligado.
+
+
+PRIMEIRO USO (passagem de som)
+------------------------------
+1. Aba "Analise" > escolha 30 s > "Iniciar leitura".
+2. Fale ou toque normalmente, COM algumas pausas (para medir o ruido).
+3. Confira os ajustes sugeridos e clique em "Aplicar ajustes".
+4. Volte para a aba "Minimalista" e deixe o plugin trabalhar.
+
+
+CONTROLES
+---------
+  TARGET LEVEL ....... nivel que voce quer na saida (padrao -18 dBFS)
+  ON / OFF ........... liga/desliga (OFF = passa o som sem mexer)
+  HOLD ............... congela o ganho atual (ex.: durante a pregacao)
+  Deteccao ........... Pico, RMS ou Pico + RMS (padrao)
+  Resposta ........... Lenta (ao vivo, padrao), Media, Rapida
+  Gate (silencio) .... abaixo deste nivel o ganho NAO sobe (evita chiado e microfonia)
+  Aumento maximo ..... quanto o plugin pode subir (padrao +12 dB)
+  Corte maximo ....... quanto o plugin pode baixar (padrao -24 dB)
+  Protecao de pico ... teto da saida, nunca passa disso (padrao -1 dBFS)
+
+  Latencia: 0 ms.
+
+
+ATENCAO
+-------
+  - Como Input FX, o ganho fica gravado junto se a track estiver gravando.
+  - Se aparecer chiado nas pausas: suba o Gate (ex.: de -50 para -45).
+  - Se o ganho demorar a acompanhar: Resposta "Media".
+
+
+DESINSTALAR
+-----------
+  Apague a pasta  C:\Program Files\Common Files\VST3\Auto Gain.vst3
+  e faca o Re-scan no REAPER.
