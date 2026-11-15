@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(AutoGainLimiter VERSION 1.0.0)
+project(AutoGainLimiter VERSION 1.1.0)
 
 # Auto Gain + Limiter by Augusto Souza
 # Pasta autogain/limiter: usa o motor do Auto Gain (../Source) e a fonte Inter (../Fonts)
@@ -20,7 +20,7 @@ FetchContent_MakeAvailable(JUCE)
 set(AG_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 juce_add_plugin(AutoGainLimiter
-    VERSION                   1.0.0
+    VERSION                   1.1.0
     COMPANY_NAME              "Augusto Souza"
     PLUGIN_MANUFACTURER_CODE  Augs
     PLUGIN_CODE               AgLm
@@ -35,7 +35,10 @@ juce_add_plugin(AutoGainLimiter
 juce_add_binary_data(AGLFonts SOURCES
     ${AG_ROOT}/Fonts/Inter-Regular.otf
     ${AG_ROOT}/Fonts/Inter-Bold.otf
-    ${AG_ROOT}/Fonts/Inter-BoldItalic.otf)
+    ${AG_ROOT}/Fonts/Inter-BoldItalic.otf
+    Fonts/Inter-SemiBold.otf
+    Fonts/JetBrainsMono-Regular.ttf
+    Fonts/JetBrainsMono-Bold.ttf)
 
 target_sources(AutoGainLimiter PRIVATE
     Source/PluginProcessor.cpp

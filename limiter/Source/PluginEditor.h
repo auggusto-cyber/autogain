@@ -3,37 +3,54 @@
 #include "PluginProcessor.h"
 #include <array>
 
-namespace Neon
+// Paleta do layout do Augusto (v1.1)
+namespace Pal
 {
-    const juce::Colour black   { 0xff000000 };
-    const juce::Colour panel   { 0xff0e1013 };
-    const juce::Colour well    { 0xff050607 };
-    const juce::Colour border  { 0xff262b33 };
-    const juce::Colour control { 0xff16191e };
-    const juce::Colour edge    { 0xff333a44 };
-    const juce::Colour track   { 0xff14171c };
-    const juce::Colour white   { 0xfff2f4f6 };
-    const juce::Colour grey    { 0xffa8b0bc };
-    const juce::Colour light   { 0xffc9d0d9 };
-    const juce::Colour cyan    { 0xff00f0ff };
-    const juce::Colour lime    { 0xff39ff14 };
-    const juce::Colour yellow  { 0xffffe600 };
-    const juce::Colour magenta { 0xffff2bd6 };
-    const juce::Colour red     { 0xffff2b4e };
+    const juce::Colour bg      { 0xff0b0d10 };   // fundo da janela
+    const juce::Colour panel   { 0xff13161b };   // paineis
+    const juce::Colour inner   { 0xff0d1014 };   // caixas internas
+    const juce::Colour field   { 0xff090b0e };   // campos / combos
+    const juce::Colour line    { 0xff242830 };   // bordas
+    const juce::Colour line2   { 0xff2f343d };   // bordas de botoes
+    const juce::Colour tabOn   { 0xff252a32 };
+    const juce::Colour track   { 0xff262b33 };
+    const juce::Colour white   { 0xfff3f5f8 };
+    const juce::Colour text    { 0xffd5d9e0 };
+    const juce::Colour grey    { 0xff8d95a3 };
+    const juce::Colour dim     { 0xff5f6774 };
+    const juce::Colour cyan    { 0xff22c7ee };
+    const juce::Colour pink    { 0xffff3d8b };
+    const juce::Colour amber   { 0xfff5a524 };
+    const juce::Colour green   { 0xff34d399 };
+    const juce::Colour greenBt { 0xff10b981 };
+    const juce::Colour red     { 0xffef4444 };
 }
 
-class NeonLookAndFeel : public juce::LookAndFeel_V4
+class AGLLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-    NeonLookAndFeel();
-    void drawButtonBackground (juce::Graphics&, juce::Button&, const juce::Colour&, bool over, bool down) override;
-    juce::Font getTextButtonFont (juce::TextButton&, int buttonHeight) override;
-    void drawLinearSlider (juce::Graphics&, int x, int y, int w, int h, float pos, float minPos, float maxPos,
-                           juce::Slider::SliderStyle, juce::Slider&) override;
+    AGLLookAndFeel();
+
     juce::Typeface::Ptr getTypefaceForFont (const juce::Font&) override;
 
+    void drawButtonBackground (juce::Graphics&, juce::Button&, const juce::Colour&, bool over, bool down) override;
+    void drawButtonText (juce::Graphics&, juce::TextButton&, bool over, bool down) override;
+
+    void drawRotarySlider (juce::Graphics&, int x, int y, int w, int h, float pos, float start, float end, juce::Slider&) override;
+    void drawLinearSlider (juce::Graphics&, int x, int y, int w, int h, float pos, float minPos, float maxPos,
+                           juce::Slider::SliderStyle, juce::Slider&) override;
+
+    void drawComboBox (juce::Graphics&, int w, int h, bool down, int bx, int by, int bw, int bh, juce::ComboBox&) override;
+    juce::Font getComboBoxFont (juce::ComboBox&) override;
+    void positionComboBoxText (juce::ComboBox&, juce::Label&) override;
+    juce::Font getPopupMenuFont() override;
+
+    static juce::Font sans (float h, bool isBold = false);
+    static juce::Font heavy (float h);
+    static juce::Font mono (float h, bool isBold = false);
+
 private:
-    juce::Typeface::Ptr interRegular, interBold, interBoldItalic;
+    juce::Typeface::Ptr interRegular, interSemi, interBold, monoRegular, monoBold;
 };
 
 class AGLEditor : public juce::AudioProcessorEditor, private juce::Timer
@@ -53,15 +70,14 @@ private:
     void timerCallback() override;
     void setTab (int tab);
     void setParam (const juce::String& id, float value);
-    void nudge (const juce::String& id, float delta, float lo, float hi);
 
     void paintHeader (juce::Graphics&);
-    void paintChain (juce::Graphics&);
     void paintMinimal (juce::Graphics&);
     void paintAdvanced (juce::Graphics&);
     void paintAnalysis (juce::Graphics&);
-    void paintLevelMeter (juce::Graphics&, juce::Rectangle<int>, float levelDb, float peakDb, float markDb, juce::Colour mark);
-    void paintGrMeter (juce::Graphics&, juce::Rectangle<int>, float grDb);
+    void paintOutputBar (juce::Graphics&);
+    void paintVMeter (juce::Graphics&, juce::Rectangle<int>, float levelDb, float peakDb, float markDb, juce::Colour mark);
+    void paintStatus (juce::Graphics&, juce::Rectangle<int>, juce::Colour, const juce::String& text, const juce::String& right);
 
     struct Suggestion
     {
@@ -69,27 +85,28 @@ private:
         bool  truePeak = false, raiseLookahead = false;
     };
     Suggestion makeSuggestion() const;
+    int heightForTab (int tab) const;
 
     AGLProcessor& proc;
-    juce::SharedResourcePointer<NeonLookAndFeel> lnf;
+    juce::SharedResourcePointer<AGLLookAndFeel> lnf;
     static inline std::atomic<int> openEditors { 0 };
 
     using SliderAtt = juce::AudioProcessorValueTreeState::SliderAttachment;
     using ComboAtt  = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
     using ButtonAtt = juce::AudioProcessorValueTreeState::ButtonAttachment;
 
-    // geral
+    // cabecalho
+    juce::TextButton agPill, limPill, simButton, holdButton { "HOLD" }, powerButton { "ON" };
     juce::TextButton tabButtons[3];
-    juce::TextButton powerButton { "ON" }, holdButton { "HOLD" }, agButton, limButton;
 
-    // Minimalista
-    juce::TextButton targetDown { "-" }, targetUp { "+" }, threshDown { "-" }, threshUp { "+" }, ceilDown { "-" }, ceilUp { "+" };
+    // Minimalista: knobs
+    juce::Slider targetKnob, thresholdKnob, ceilingKnob;
 
     // Avancado - Auto Gain
     juce::Slider targetSlider, gateSlider, boostSlider, cutSlider;
     juce::ComboBox detectionBox, responseBox;
     // Avancado - Limiter
-    juce::Slider thresholdSlider, ceilingSlider, releaseSlider;
+    juce::Slider thresholdSlider, ceilingSlider, releaseField;
     juce::TextButton linkButton { "LINK" }, autoRelButton { "AUTO" }, truePeakButton { "TRUE PEAK" };
     juce::ComboBox lookaheadBox;
 
@@ -98,6 +115,7 @@ private:
     juce::TextButton startButton { "Iniciar leitura" }, applyButton { "Aplicar nos dois" }, discardButton { "Descartar" };
 
     std::unique_ptr<ButtonAtt> powerAtt, holdAtt, agAtt, limAtt, linkAtt, autoRelAtt, truePeakAtt;
+    std::unique_ptr<SliderAtt> targetKnobAtt, thresholdKnobAtt, ceilingKnobAtt;
     std::unique_ptr<SliderAtt> targetAtt, gateAtt, boostAtt, cutAtt, thresholdAtt, ceilingAtt, releaseAtt;
     std::unique_ptr<ComboAtt>  detectionAtt, responseAtt, lookaheadAtt;
 

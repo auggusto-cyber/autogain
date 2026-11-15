@@ -43,6 +43,10 @@ public:
     Analyzer       analyzer;
     std::atomic<int> uiTab { 0 };
 
+    // "Simular Audio": troca a entrada por um sinal de teste (fala com pausas e golpes).
+    // Nao e salvo na sessao: sempre comeca desligado.
+    std::atomic<bool> simulate { false };
+
     float param (const char* id) const { return apvts.getRawParameterValue (id)->load(); }
     AutoGainParams agParams() const;
     LimiterParams  limParams() const;
@@ -52,6 +56,9 @@ public:
 
 private:
     void timerCallback() override;   // atualiza a latencia quando o lookahead muda
+    void fillSimulation (juce::AudioBuffer<float>&, int numCh, int n);
+    double simPhase = 0.0, simTime = 0.0;
+    juce::Random simRandom;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AGLProcessor)
 };

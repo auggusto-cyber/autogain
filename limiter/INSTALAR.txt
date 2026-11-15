@@ -1,10 +1,10 @@
 =====================================================
-  AUTO GAIN + LIMITER by Augusto Souza  -  v1.0.0  (VST3, Windows 64 bits)
+  AUTO GAIN + LIMITER by Augusto Souza  -  v1.1.0  (VST3, Windows 64 bits)
   Cadeia: Entrada -> Auto Gain -> Limiter -> Saida
 =====================================================
 
 ONDE BAIXAR
-  https://github.com/auggusto-cyber/autogain/releases/tag/agl-v1.0.0
+  https://github.com/auggusto-cyber/autogain/releases/tag/agl-v1.1.0
   Arquivo: AutoGainLimiter-Windows-x64.zip
   (o repositorio e privado: entre com a conta auggusto-cyber)
 
@@ -47,12 +47,15 @@ A CADEIA (topo da janela)
   LIMITER ON/OFF ..... liga/desliga so o limiter
   ON (canto) ......... liga/desliga tudo
   HOLD ............... congela o ganho do Auto Gain (ex.: pregacao)
+  Simular Audio ...... troca a entrada por um sinal de teste (fala com pausas)
+                       para ver o plugin funcionando sem microfone.
+                       ATENCAO: desligue antes do culto! (sempre abre desligado)
   Latencia ........... mostra o atraso atual do plugin
 
 
 1. AUTO GAIN
 ------------
-  Target Level ...... nivel que voce quer (padrao -18 dBFS)
+  Knob / Target Level ...... nivel que voce quer (padrao -18 dBFS)
   Deteccao .......... Pico, RMS ou Pico + RMS (padrao)
   Resposta .......... Lenta (ao vivo, padrao), Media, Rapida
   Gate (silencio) ... abaixo disso o ganho NAO sobe (padrao -50 dBFS)
@@ -62,6 +65,8 @@ A CADEIA (topo da janela)
 
 2. LIMITER
 ----------
+  Knobs: arraste ou use o scroll do mouse; duplo clique volta ao padrao.
+
   Threshold ......... abaixar sobe o volume e corta os picos (como o L2)
                       ganho do limiter = Ceiling - Threshold
                       padrao -1.0 (= Ceiling: so protege, nao aumenta)

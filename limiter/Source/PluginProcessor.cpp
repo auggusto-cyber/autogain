@@ -134,10 +134,38 @@ void AGLProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuf
     if (numIn <= 0 || n <= 0)
         return;
 
+    if (simulate.load())
+        fillSimulation (buffer, numIn, n);
+
     float* const* data = buffer.getArrayOfWritePointers();
     analyzer.process (buffer.getArrayOfReadPointers(), numIn, n);   // leitura na entrada
     ag.process (data, numIn, n, agParams());                        // 1. Auto Gain
     lim.process (data, numIn, n, limParams());                      // 2. Limiter
+}
+
+void AGLProcessor::fillSimulation (juce::AudioBuffer<float>& buffer, int numCh, int n)
+{
+    // voz simulada a ~-26 dBFS RMS: 2 s falando, 1 s de pausa com chiado (-58 dBFS), golpes fortes de vez em quando
+    const double sr = getSampleRate() > 0.0 ? getSampleRate() : 48000.0;
+    const double twoPi = juce::MathConstants<double>::twoPi;
+    for (int i = 0; i < n; ++i)
+    {
+        const bool pause = std::fmod (simTime, 3.0) >= 2.0;
+        float s;
+        if (pause)
+            s = 0.0022f * (2.0f * simRandom.nextFloat() - 1.0f);
+        else
+        {
+            const double syll = 0.55 + 0.45 * std::sin (twoPi * 4.3 * simTime);
+            s = (float) (0.07 * syll * (std::sin (simPhase) + 0.35 * std::sin (2.0 * simPhase) + 0.15 * std::sin (3.0 * simPhase)));
+            if (std::fmod (simTime, 5.3) < 0.025)
+                s += 0.45f * (float) std::sin (twoPi * 1200.0 * simTime);
+        }
+        simPhase += twoPi * (180.0 + 25.0 * std::sin (twoPi * 0.7 * simTime)) / sr;
+        simTime += 1.0 / sr;
+        for (int c = 0; c < numCh; ++c)
+            buffer.setSample (c, i, s);
+    }
 }
 
 void AGLProcessor::getStateInformation (juce::MemoryBlock& destData)

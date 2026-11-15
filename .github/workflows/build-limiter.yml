@@ -67,18 +67,18 @@ jobs:
             limiter/pluginval-logs/
           if-no-files-found: error
 
-      - name: Publicar na pagina de downloads (Release agl-v1.0.0)
+      - name: Publicar na pagina de downloads (Release agl-v1.1.0)
         if: github.ref == 'refs/heads/main'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = "agl-v1.0.0"
+          $tag = "agl-v1.1.0"
           $notes = "Auto Gain + Limiter by Augusto Souza - build automatico de ${{ github.sha }}. Testes: motores OK + Auto Gain OK + pluginval nivel 5 OK."
           gh release view $tag 2>$null
           if ($LASTEXITCODE -ne 0) {
             # --latest=false: o link 'releases/latest' continua sendo o Auto Gain v1.0
-            gh release create $tag dist\AutoGainLimiter-Windows-x64.zip dist\INSTALAR.txt --title "Auto Gain + Limiter v1.0.0" --notes "$notes" --latest=false
+            gh release create $tag dist\AutoGainLimiter-Windows-x64.zip dist\INSTALAR.txt --title "Auto Gain + Limiter v1.1.0" --notes "$notes" --latest=false
           } else {
             gh release upload $tag dist\AutoGainLimiter-Windows-x64.zip dist\INSTALAR.txt --clobber
             gh release edit $tag --notes "$notes"

@@ -42,6 +42,7 @@ public:
     std::atomic<float> grDb { 0.0f };            // atenuacao atual (<= 0)
     std::atomic<float> grPeakSinceRead { 0.0f }; // maior atenuacao desde a ultima leitura (<= 0)
     std::atomic<float> outPeakDb { -100.0f };
+    std::atomic<float> outPeakChDb[maxChannels] { { -100.0f }, { -100.0f } };   // L / R
 
     static float toDb (float lin)  { return 20.0f * std::log10 (lin + 1.0e-9f); }
     static float fromDb (float db) { return std::pow (10.0f, db / 20.0f); }
@@ -86,6 +87,7 @@ public:
         const int   W       = L + 1;
         float blockMinGain  = 1.0f;
         float outPk         = 0.0f;
+        float outPkCh[maxChannels] { 0.0f, 0.0f };
 
         for (int i = 0; i < n; ++i, ++pos)
         {
@@ -170,6 +172,7 @@ public:
                 }
                 ch[c][i] = y;
                 outPk = std::max (outPk, std::abs (y));
+                outPkCh[c] = std::max (outPkCh[c], std::abs (y));
             }
             blockMinGain = std::min (blockMinGain, p.active ? g : 1.0f);
         }
@@ -179,6 +182,8 @@ public:
         float prev = grPeakSinceRead.load();
         while (gr < prev && ! grPeakSinceRead.compare_exchange_weak (prev, gr)) {}
         outPeakDb.store (toDb (outPk));
+        for (int c = 0; c < maxChannels; ++c)
+            outPeakChDb[c].store (toDb (c < numCh ? outPkCh[c] : outPkCh[0]));
     }
 
 private:
