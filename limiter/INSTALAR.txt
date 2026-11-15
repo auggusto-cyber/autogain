@@ -1,0 +1,102 @@
+=====================================================
+  AUTO GAIN + LIMITER by Augusto Souza  -  v1.0.0  (VST3, Windows 64 bits)
+  Cadeia: Entrada -> Auto Gain -> Limiter -> Saida
+=====================================================
+
+ONDE BAIXAR
+  https://github.com/auggusto-cyber/autogain/releases/tag/agl-v1.0.0
+  Arquivo: AutoGainLimiter-Windows-x64.zip
+  (o repositorio e privado: entre com a conta auggusto-cyber)
+
+  Este plugin e separado do "Auto Gain" v1.0. Os dois podem ficar
+  instalados juntos; no REAPER eles aparecem com nomes diferentes.
+
+
+INSTALACAO
+----------
+1. Baixe o AutoGainLimiter-Windows-x64.zip no PC do som.
+
+2. Botao direito no zip > "Extrair tudo...".
+   Dentro tem a pasta "Auto Gain + Limiter.vst3" e este INSTALAR.txt.
+
+3. Copie a pasta "Auto Gain + Limiter.vst3" INTEIRA para:
+
+       C:\Program Files\Common Files\VST3\
+
+   (o Windows pede permissao de administrador: clique em Continuar)
+
+4. REAPER: Options > Preferences > Plug-ins > VST > "Re-scan" > OK.
+
+5. Na track: botao "IN FX" > procure "Auto Gain + Limiter"
+   (fabricante: Augusto Souza) > adicione.
+
+   O Input FX so funciona com a track ARMADA ou com o MONITORAMENTO ligado.
+
+
+PRIMEIRO USO (passagem de som)
+------------------------------
+1. Aba "Analise" > Destino "Ao vivo" > 30 s > "Iniciar leitura".
+2. Fale/toque normalmente, COM pausas e com o trecho mais forte.
+3. Confira os ajustes sugeridos e clique em "Aplicar nos dois".
+4. Volte para a aba "Minimalista".
+
+
+A CADEIA (topo da janela)
+-------------------------
+  AUTO GAIN ON/OFF ... liga/desliga so o ganho automatico
+  LIMITER ON/OFF ..... liga/desliga so o limiter
+  ON (canto) ......... liga/desliga tudo
+  HOLD ............... congela o ganho do Auto Gain (ex.: pregacao)
+  Latencia ........... mostra o atraso atual do plugin
+
+
+1. AUTO GAIN
+------------
+  Target Level ...... nivel que voce quer (padrao -18 dBFS)
+  Deteccao .......... Pico, RMS ou Pico + RMS (padrao)
+  Resposta .......... Lenta (ao vivo, padrao), Media, Rapida
+  Gate (silencio) ... abaixo disso o ganho NAO sobe (padrao -50 dBFS)
+  Aumento maximo .... +12 dB    Corte maximo .... -24 dB
+  Latencia: 0 ms.
+
+
+2. LIMITER
+----------
+  Threshold ......... abaixar sobe o volume e corta os picos (como o L2)
+                      ganho do limiter = Ceiling - Threshold
+                      padrao -1.0 (= Ceiling: so protege, nao aumenta)
+  Ceiling ........... teto absoluto da saida (padrao -1.0 dBFS)
+  LINK .............. move Threshold e Ceiling juntos
+  Release ........... AUTO (padrao: rapido nos estalos, lento nos trechos
+                      fortes) ou manual de 1 a 1000 ms
+  Lookahead ......... 0 ms (ao vivo, latencia zero) / 1 ms (padrao) / 3 / 5 ms
+                      quanto maior, mais limpo o corte e maior o atraso
+  True Peak ......... pega picos entre amostras (gravacao/streaming);
+                      precisa de lookahead de 1 ms ou mais
+
+
+LATENCIA (medida, 48 kHz)
+-------------------------
+  Lookahead 0 ms ............. 0 ms
+  Lookahead 1 ms (padrao) .... 1,00 ms  (48 amostras)
+  Lookahead 3 ms ............. 3,00 ms  (144 amostras)
+  Lookahead 5 ms ............. 5,00 ms  (240 amostras)
+  + True Peak ................ +0,125 ms (6 amostras)
+
+  A latencia NAO soma entre tracks: com 20 tracks, cada uma continua
+  com a mesma latencia. O REAPER compensa na reproducao; ao vivo ela
+  entra no retorno (fone).
+
+
+DICAS
+-----
+  - Ao vivo no IN FX: lookahead 0 ou 1 ms, True Peak desligado.
+  - Master / gravacao / streaming: 3 a 5 ms + True Peak.
+  - Se o som ficar "esmagado": suba o Threshold (menos atenuacao).
+  - Chiado nas pausas: suba o Gate (ex.: de -50 para -45).
+
+
+DESINSTALAR
+-----------
+  Apague C:\Program Files\Common Files\VST3\Auto Gain + Limiter.vst3
+  e faca o Re-scan no REAPER.

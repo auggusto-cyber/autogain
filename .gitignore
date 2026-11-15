@@ -2,3 +2,5 @@ build/
 dist/
 *.user
 .vs/
+limiter/build/
+limiter/dist/

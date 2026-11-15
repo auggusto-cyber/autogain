@@ -3,6 +3,9 @@ name: Compilar Auto Gain (Windows)
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'limiter/**'
+      - '.github/workflows/build-limiter.yml'
   workflow_dispatch:
 
 permissions:

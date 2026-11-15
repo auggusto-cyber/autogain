@@ -1,0 +1,85 @@
+name: Compilar Auto Gain + Limiter (Windows)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'limiter/**'
+      - 'Source/AutoGainEngine.h'
+      - 'Fonts/**'
+      - '.github/workflows/build-limiter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: limiter
+
+    steps:
+      - name: Baixar o codigo
+        uses: actions/checkout@v5
+
+      - name: Configurar (CMake + Visual Studio 2022)
+        run: cmake -S . -B build -A x64 -DAGL_BUILD_TESTS=ON
+
+      - name: Compilar plugin VST3 e testes
+        run: cmake --build build --config Release --parallel
+
+      - name: Teste 1 - motores do Limiter + analisador + cadeia + CPU 20 tracks
+        run: .\build\Release\LimiterTest.exe
+
+      - name: Teste 2 - motor do Auto Gain
+        run: .\build\Release\EngineTest.exe
+
+      - name: Teste 3 - pluginval (validacao do VST3, nivel 5)
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_Windows.zip -OutFile pluginval.zip
+          Expand-Archive pluginval.zip -DestinationPath pluginval
+          $vst3 = "build\AutoGainLimiter_artefacts\Release\VST3\Auto Gain + Limiter.vst3"
+          $p = Start-Process -FilePath ".\pluginval\pluginval.exe" -Wait -PassThru -NoNewWindow `
+                 -ArgumentList @("--strictness-level", "5", "--validate-in-process", "--output-dir", "pluginval-logs", "`"$vst3`"")
+          Get-ChildItem pluginval-logs -Filter *.txt -ErrorAction SilentlyContinue | ForEach-Object { Get-Content $_.FullName }
+          if ($p.ExitCode -ne 0) { Write-Error "pluginval reprovou o plugin (codigo $($p.ExitCode))"; exit 1 }
+          Write-Host "pluginval: APROVADO"
+
+      - name: Montar pacote de instalacao
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist\pkg | Out-Null
+          Copy-Item -Recurse "build\AutoGainLimiter_artefacts\Release\VST3\Auto Gain + Limiter.vst3" "dist\pkg\"
+          Copy-Item INSTALAR.txt dist\pkg\
+          Copy-Item INSTALAR.txt dist\
+          Compress-Archive -Path dist\pkg\* -DestinationPath dist\AutoGainLimiter-Windows-x64.zip
+
+      - name: Guardar pacote (Actions)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AutoGainLimiter-Windows-x64
+          path: |
+            limiter/dist/AutoGainLimiter-Windows-x64.zip
+            limiter/pluginval-logs/
+          if-no-files-found: error
+
+      - name: Publicar na pagina de downloads (Release agl-v1.0.0)
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "agl-v1.0.0"
+          $notes = "Auto Gain + Limiter by Augusto Souza - build automatico de ${{ github.sha }}. Testes: motores OK + Auto Gain OK + pluginval nivel 5 OK."
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            # --latest=false: o link 'releases/latest' continua sendo o Auto Gain v1.0
+            gh release create $tag dist\AutoGainLimiter-Windows-x64.zip dist\INSTALAR.txt --title "Auto Gain + Limiter v1.0.0" --notes "$notes" --latest=false
+          } else {
+            gh release upload $tag dist\AutoGainLimiter-Windows-x64.zip dist\INSTALAR.txt --clobber
+            gh release edit $tag --notes "$notes"
+          }

@@ -21,6 +21,7 @@ struct AutoGainParams
     float ceiling  = -1.0f;   // dBFS - teto da protecao de pico
     bool  active   = true;
     bool  hold     = false;
+    bool  peakProtection = true;  // false quando um limiter depois cuida do teto (Auto Gain + Limiter)
 };
 
 class AutoGainEngine
@@ -198,7 +199,7 @@ public:
                     a = std::max (a, std::abs (channels[c][start + i] * g));
 
                 float lim = 1.0f;
-                if (p.active)
+                if (p.active && p.peakProtection)
                 {
                     const float needed = a > ceilLin ? ceilLin / a : 1.0f;
                     limEnv = needed < limEnv ? needed : needed + (limEnv - needed) * limRelCoef;
@@ -210,7 +211,7 @@ public:
                 for (int c = 0; c < numCh; ++c)
                 {
                     float y = channels[c][start + i] * g * lim;
-                    if (p.active)
+                    if (p.active && p.peakProtection)
                         y = std::clamp (y, -ceilLin, ceilLin);  // trava final de seguranca
                     channels[c][start + i] = y;
                     sq = std::max (sq, y * y);
